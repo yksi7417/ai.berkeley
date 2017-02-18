@@ -86,8 +86,42 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    print "Start:", problem.getStartState()
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    successors = problem.getSuccessors(problem.getStartState())
+    print "Start's successors:", successors
+    for successor in successors:
+        print "functions in successor: ", successor[0], successor[1], successor[2]
+
+    # return []
+    from game import Directions
+    result =  bfs_recursive(problem=problem, currentState=problem.getStartState(), prevStates=[], direction = None, depth=0)
+    print result
+    return result
+
+def bfs_recursive(problem, currentState, prevStates, direction, depth):
+    # if depth > 200:
+    #     return [direction]
+    #
+    if problem.isGoalState(currentState):
+        if direction is None:
+            return []
+        else:
+            return [direction]
+    else:
+        successors = problem.getSuccessors(currentState)
+        print currentState, "my successors:", successors
+        for successor in successors:
+            nextState = successor[0]
+            if nextState in prevStates:
+                continue
+            search_result = bfs_recursive(problem, currentState=nextState, prevStates=prevStates + [currentState], direction=successor[1], depth=depth+1)
+            if len(search_result) > 0:
+                if direction is None:
+                    return search_result
+                else:
+                    return [direction] + search_result
+        return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""

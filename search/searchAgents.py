@@ -129,7 +129,10 @@ class SearchAgent(Agent):
         i = self.actionIndex
         self.actionIndex += 1
         if i < len(self.actions):
-            return self.actions[i]
+            if self.actions[i] in state.getLegalPacmanActions():
+                return self.actions[i]
+            else:
+                return Directions.STOP
         else:
             return Directions.STOP
 
