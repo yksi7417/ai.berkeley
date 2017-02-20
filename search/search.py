@@ -73,11 +73,12 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    fringe=util.Stack()
+    return genericSearch(problem, util.Stack())
+
+def genericSearch(problem, fringe):
     fringe.push((problem.getStartState(), []))
     expandedNodes = []
     while not fringe.isEmpty():
-        # print "fringe", str(fringe)
         leafNode = fringe.pop()
         current_state = leafNode[0]
         path_to_current_state = leafNode[1]
@@ -102,20 +103,7 @@ def expand_node(problem, leafNode):
     return result
 
 def breadthFirstSearch(problem):
-    fringe=util.Queue()
-    fringe.push((problem.getStartState(), []))
-    prevStates = []
-    while not fringe.isEmpty():
-        leafNode = fringe.pop()
-        current_state = leafNode[0]
-        path_to_current_state = leafNode[1]
-        if problem.isGoalState(current_state):
-            return path_to_current_state
-        else:
-            for node in expand_node(problem, leafNode, prevStates):
-                fringe.push(node)
-    return []
-
+    return genericSearch(problem, util.Queue())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
