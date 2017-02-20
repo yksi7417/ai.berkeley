@@ -73,60 +73,49 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
+    fringe=util.Stack()
+    fringe.push((problem.getStartState(), []))
+    expandedNodes = []
+    while not fringe.isEmpty():
+        # print "fringe", str(fringe)
+        leafNode = fringe.pop()
+        current_state = leafNode[0]
+        path_to_current_state = leafNode[1]
+        if problem.isGoalState(current_state):
+            return path_to_current_state
+        else:
+            if current_state not in expandedNodes:
+                for node in expand_node(problem, leafNode):
+                    fringe.push(node)
+                expandedNodes.append(current_state)
+    return []
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    successors = problem.getSuccessors(problem.getStartState())
-    print "Start's successors:", successors
+def expand_node(problem, leafNode):
+    current_state = leafNode[0]
+    path_to_current_state = leafNode[1]
+    result = []
+    successors = problem.getSuccessors(current_state)
     for successor in successors:
-        print "functions in successor: ", successor[0], successor[1], successor[2]
-
-    # return []
-    from game import Directions
-    result =  bfs_recursive(problem=problem, currentState=problem.getStartState(), prevStates=[], direction = None, depth=0)
-    print result
+        next_state = successor[0]
+        direction = successor[1]
+        result += [(next_state, path_to_current_state+ [direction])]
     return result
 
-def bfs_recursive(problem, currentState, prevStates, direction, depth):
-    # if depth > 200:
-    #     return [direction]
-    #
-    if problem.isGoalState(currentState):
-        if direction is None:
-            return []
-        else:
-            return [direction]
-    else:
-        successors = problem.getSuccessors(currentState)
-        print currentState, "my successors:", successors
-        for successor in successors:
-            nextState = successor[0]
-            if nextState in prevStates:
-                continue
-            search_result = bfs_recursive(problem, currentState=nextState, prevStates=prevStates + [currentState], direction=successor[1], depth=depth+1)
-            if len(search_result) > 0:
-                if direction is None:
-                    return search_result
-                else:
-                    return [direction] + search_result
-        return []
-
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe=util.Queue()
+    fringe.push((problem.getStartState(), []))
+    prevStates = []
+    while not fringe.isEmpty():
+        leafNode = fringe.pop()
+        current_state = leafNode[0]
+        path_to_current_state = leafNode[1]
+        if problem.isGoalState(current_state):
+            return path_to_current_state
+        else:
+            for node in expand_node(problem, leafNode, prevStates):
+                fringe.push(node)
+    return []
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
