@@ -91,7 +91,24 @@ def genericSearch(problem, fringe):
                 expandedNodes.append(current_state)
     return []
 
-def expand_node(problem, leafNode):
+def genericCostSearch(problem, fringe):
+    fringe.push((problem.getStartState(), [], 0), 0)
+    expandedNodes = []
+    while not fringe.isEmpty():
+        leafNode = fringe.pop()
+        current_state = leafNode[0]
+        path_to_current_state = leafNode[1]
+        aggregate_cost = leafNode[2]
+        if problem.isGoalState(current_state):
+            return path_to_current_state
+        else:
+            if current_state not in expandedNodes:
+                for node in expand_node(problem, leafNode, aggregate_cost):
+                    fringe.push(node, node[2])
+                expandedNodes.append(current_state)
+    return []
+
+def expand_node(problem, leafNode, aggregate_cost):
     current_state = leafNode[0]
     path_to_current_state = leafNode[1]
     result = []
@@ -99,16 +116,15 @@ def expand_node(problem, leafNode):
     for successor in successors:
         next_state = successor[0]
         direction = successor[1]
-        result += [(next_state, path_to_current_state+ [direction])]
+        step_cost= successor[2]
+        result += [(next_state, path_to_current_state+ [direction], aggregate_cost + step_cost)]
     return result
 
 def breadthFirstSearch(problem):
     return genericSearch(problem, util.Queue())
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return genericCostSearch(problem, util.PriorityQueue())
 
 def nullHeuristic(state, problem=None):
     """
@@ -118,10 +134,24 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    fringe = util.PriorityQueue();
+    fringe.push((problem.getStartState(), [], 0), 0)
+    expandedNodes = []
+    while not fringe.isEmpty():
+        leafNode = fringe.pop()
+        current_state = leafNode[0]
+        path_to_current_state = leafNode[1]
+        aggregate_cost = leafNode[2]
+        if problem.isGoalState(current_state):
+            return path_to_current_state
+        else:
+            if current_state not in expandedNodes:
+                for node in expand_node(problem, leafNode, aggregate_cost):
+                    next_state = node[0]
+                    h_cost = heuristic(next_state, problem)
+                    fringe.push(node, node[2] + h_cost)
+                expandedNodes.append(current_state)
+    return []
 
 # Abbreviations
 bfs = breadthFirstSearch
