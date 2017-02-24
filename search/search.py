@@ -108,7 +108,7 @@ def genericCostSearch(problem, fringe):
                 expandedNodes.append(current_state)
     return []
 
-def expand_node(problem, leafNode, aggregate_cost):
+def expand_node(problem, leafNode, aggregate_cost=0):
     current_state = leafNode[0]
     path_to_current_state = leafNode[1]
     result = []
