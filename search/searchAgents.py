@@ -493,6 +493,9 @@ def foodHeuristic(state, problem):
     for i, j in foodGrid.asList():
         manhattan_distance = abs(position[0] - i)  + abs(position[1] - j)
         estimated_distance = min(manhattan_distance , estimated_distance)
+#    for point in foodGrid.asList():
+#        shortest_path_distance = mazeDistance(point, position, state)
+#        estimated_distance = min(shortest_path_distance , estimated_distance)
 
     if (sys.maxint == estimated_distance):
         return 0
@@ -525,24 +528,8 @@ class ClosestDotSearchAgent(SearchAgent):
         start_position = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
-
-        upHasFood = start_position[0]
-
-        minPath = None
-        minPathLength = sys.maxint
-
-        for goal_position in food.asList():
-            problem = AnyFoodSearchProblem(gameState)
-            problem.goal = goal_position
-            path = search.bfs(problem)
-            if (len(path) < minPathLength) :
-                minPath = path
-                minPathLength = len(path)
-
-        if (minPath is None):
-            return []
-
-        return minPath
+        problem = AnyFoodSearchProblem(gameState)
+        return search.bfs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -577,8 +564,6 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
         return self.food[x][y]
-
-
 
 def mazeDistance(point1, point2, gameState):
     """
