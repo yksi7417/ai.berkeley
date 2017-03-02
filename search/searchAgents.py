@@ -525,6 +525,9 @@ class ClosestDotSearchAgent(SearchAgent):
         start_position = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
+
+        upHasFood = start_position[0]
+
         minPath = None
         minPathLength = sys.maxint
 
@@ -573,6 +576,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        return self.food[x][y]
+
 
 
 def mazeDistance(point1, point2, gameState):
