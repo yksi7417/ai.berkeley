@@ -72,9 +72,32 @@ class ReflexAgent(Agent):
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        x,y = newPos
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        import searchAgents, search
+        problem = searchAgents.AnyFoodSearchProblem(successorGameState)
+        closestFoodPath = search.bfs(problem)
+
+        ## logic to run towards food
+        foodScore = 0
+        if currentGameState.getFood()[x][y]:
+            foodScore = 10
+
+        ## logic to run away from ghost
+        ghostScore = 0
+        radar = 3
+        for gs in newGhostStates:
+            g_x, g_y = gs.getPosition()
+            distance = abs(x-g_x) + abs(y-g_y)
+            if (distance < radar):
+                ghostScore = ghostScore - (radar - distance)
+
+        if (ghostScore != 0):
+            return 100 * ghostScore
+        elif (foodScore != 0):
+            return foodScore
+        else:
+            return - len(closestFoodPath)
 
 def scoreEvaluationFunction(currentGameState):
     """
