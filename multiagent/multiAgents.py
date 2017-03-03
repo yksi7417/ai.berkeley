@@ -133,26 +133,61 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
     """
+    def flipBetweenMinMaxFunction(self, fn):
+        if fn == min:
+            return max
+        else:
+            return min
+
+    def getMaxScore(self, currentGameState, currentDepth, pathSoFar):
+        # print "getMaxScore", currentDepth, self.depth, pathSoFar
+        if currentDepth  == self.depth:
+            return self.evaluationFunction(currentGameState), pathSoFar
+        else:
+            agentIndexes = xrange(1,currentGameState.getNumAgents())
+            import sys
+            maxScore = -sys.maxint
+            move = Directions.STOP
+            finalPath = []
+            for agentIndex in agentIndexes:
+                legalMoves = currentGameState.getLegalActions(agentIndex)
+                for action in legalMoves:
+                    successor = currentGameState.generateSuccessor(agentIndex, action)
+                    scoreSoFar, thisPath= self.getMinScore(successor, currentDepth+1, pathSoFar + [action])
+                    if (scoreSoFar > maxScore):
+                        maxScore = scoreSoFar
+                        finalPath = thisPath
+            return maxScore, finalPath
+
+    def getMinScore(self, currentGameState, currentDepth, pathSoFar):
+        # print "getMinScore", currentDepth, self.depth, pathSoFar
+        if currentDepth  == self.depth:
+            return self.evaluationFunction(currentGameState), pathSoFar
+        else:
+            agentIndexes = xrange(1,currentGameState.getNumAgents())
+            import sys
+            minScore = sys.maxint
+            move = Directions.STOP
+            agentIndex = 0
+            legalMoves = currentGameState.getLegalActions(agentIndex)
+            finalPath = []
+            for action in legalMoves:
+                successor = currentGameState.generateSuccessor(agentIndex, action)
+                scoreSoFar, thisPath  = self.getMaxScore(successor, currentDepth+1, pathSoFar + [action])
+                if (scoreSoFar < minScore):
+                    minScore = scoreSoFar
+                    finalPath = thisPath
+            return minScore, finalPath
 
     def getAction(self, gameState):
         """
           Returns the minimax action from the current gameState using self.depth
           and self.evaluationFunction.
-
-          Here are some method calls that might be useful when implementing minimax.
-
-          gameState.getLegalActions(agentIndex):
-            Returns a list of legal actions for an agent
-            agentIndex=0 means Pacman, ghosts are >= 1
-
-          gameState.generateSuccessor(agentIndex, action):
-            Returns the successor game state after an agent takes an action
-
-          gameState.getNumAgents():
-            Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        score, path = self.getMaxScore(gameState, 0, [])
+        if (len(path) == 0):
+            return Directions.STOP
+        return path[0]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
