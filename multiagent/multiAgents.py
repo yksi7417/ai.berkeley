@@ -17,6 +17,9 @@ from game import Directions
 import random, util
 
 from game import Agent
+import sys
+import itertools
+
 
 class ReflexAgent(Agent):
     """
@@ -133,51 +136,58 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
     """
-    def flipBetweenMinMaxFunction(self, fn):
-        if fn == min:
-            return max
-        else:
-            return min
 
     def getMaxScore(self, currentGameState, currentDepth, pathSoFar):
-        # print "getMaxScore", currentDepth, self.depth, pathSoFar
-        if currentDepth  == self.depth:
+        if currentDepth  == self.depth or currentGameState.isWin() or currentGameState.isLose():
             return self.evaluationFunction(currentGameState), pathSoFar
-        else:
-            agentIndexes = xrange(1,currentGameState.getNumAgents())
-            import sys
-            maxScore = -sys.maxint
-            move = Directions.STOP
-            finalPath = []
-            for agentIndex in agentIndexes:
-                legalMoves = currentGameState.getLegalActions(agentIndex)
-                for action in legalMoves:
-                    successor = currentGameState.generateSuccessor(agentIndex, action)
-                    scoreSoFar, thisPath= self.getMinScore(successor, currentDepth+1, pathSoFar + [action])
-                    if (scoreSoFar > maxScore):
-                        maxScore = scoreSoFar
-                        finalPath = thisPath
-            return maxScore, finalPath
+        maxScore = -sys.maxint
+        finalPath = None
+        for action in currentGameState.getLegalActions():
+            successorState = currentGameState.generateSuccessor(0, action)
+            scoreSoFar, thisPath= self.getMinScore(successorState, currentDepth, pathSoFar + [action])
+            if (scoreSoFar > maxScore):
+                maxScore = scoreSoFar
+                finalPath = thisPath
+        return maxScore, finalPath
+
+    def expandGhostSuccessors(self, gameState, intermediateSuccessor, remainingIndex):
+        if (len(remainingIndex) == 0):
+            return []
+
+        if (intermediateSuccessor.isWin() or intermediateSuccessor.isLose()):
+            return [intermediateSuccessor]
+
+        if (len(remainingIndex) == 1):
+            successors = []
+            idx = remainingIndex[0]
+            for action in intermediateSuccessor.getLegalActions(idx):
+                nextSuccessor = intermediateSuccessor.generateSuccessor(idx, action)
+                successors = successors + [ nextSuccessor ]
+            return successors
+
+        successors = []
+        idx = remainingIndex[0]
+        whatsLeft = remainingIndex[1:]
+        legalActions = intermediateSuccessor.getLegalActions(idx)
+        for action in legalActions:
+            nextSuccessor = intermediateSuccessor.generateSuccessor(idx, action)
+            successors += self.expandGhostSuccessors(gameState, nextSuccessor, whatsLeft )
+        return successors
 
     def getMinScore(self, currentGameState, currentDepth, pathSoFar):
-        # print "getMinScore", currentDepth, self.depth, pathSoFar
-        if currentDepth  == self.depth:
+        if currentGameState.isWin() or currentGameState.isLose():
             return self.evaluationFunction(currentGameState), pathSoFar
-        else:
-            agentIndexes = xrange(1,currentGameState.getNumAgents())
-            import sys
-            minScore = sys.maxint
-            move = Directions.STOP
-            agentIndex = 0
-            legalMoves = currentGameState.getLegalActions(agentIndex)
-            finalPath = []
-            for action in legalMoves:
-                successor = currentGameState.generateSuccessor(agentIndex, action)
-                scoreSoFar, thisPath  = self.getMaxScore(successor, currentDepth+1, pathSoFar + [action])
-                if (scoreSoFar < minScore):
-                    minScore = scoreSoFar
-                    finalPath = thisPath
-            return minScore, finalPath
+        minScore = sys.maxint
+        finalPath = None
+
+        listOfGhosts = list(xrange(1, currentGameState.getNumAgents() ))
+        ghostSuccessors = self.expandGhostSuccessors(currentGameState, currentGameState, listOfGhosts)
+        for ghostSuccessor in ghostSuccessors:
+            scoreSoFar, thisPath  = self.getMaxScore(ghostSuccessor, currentDepth+1, pathSoFar)
+            if scoreSoFar < minScore:
+                minScore = scoreSoFar
+                finalPath = thisPath
+        return minScore, finalPath
 
     def getAction(self, gameState):
         """
@@ -185,8 +195,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
           and self.evaluationFunction.
         """
         score, path = self.getMaxScore(gameState, 0, [])
-        if (len(path) == 0):
-            return Directions.STOP
         return path[0]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
